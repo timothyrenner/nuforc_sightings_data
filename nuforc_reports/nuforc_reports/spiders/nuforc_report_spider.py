@@ -1,20 +1,42 @@
 # -*- coding: utf-8 -*-
 import scrapy
-
+from datetime import datetime
 
 class NuforcReportSpider(scrapy.Spider):
     name = 'nuforc_report_spider'
     allowed_domains = ['www.nuforc.org']
-    start_urls = ['http://www.nuforc.org/webreports/ndxevent.html']
+    start_urls = ['http://www.nuforc.org/webreports/ndxpost.html']
+
+    def __init__(self, start_date = None, *args, **kwargs):
+        self.start_date = \
+            datetime.strptime(start_date, '%m/%d/%Y') \
+            if start_date else None
+        super(NuforcReportSpider, self).__init__(*args, **kwargs)
 
     def parse(self, response):
         
         table_links = response.xpath('//tr/td/font/a')
         for tl in table_links:
-            if tl is not None:
-                yield response.follow(tl, self.parse_month_index)
+            
+            # Guard against empty rows.
+            if not tl: continue
 
-    def parse_month_index(self, response):
+            # Get a selector on the date text.
+            link_date_selector = tl.xpath('./text()')
+            
+            # Skip out if it's unsuccessful.
+            if not link_date_selector: continue
+
+            # If that's extracted, parse and check the date.
+            link_date = \
+                datetime.strptime(link_date_selector.extract()[0], '%m/%d/%Y')
+            
+            # If start date is None or link date is greater than start date,
+            # follow the link.
+            if (not self.start_date) or (link_date >= self.start_date):
+                yield response.follow(tl, self.parse_date_index)
+
+    def parse_date_index(self, response):
 
         table_rows = response.xpath('//table/tbody/tr')
         
@@ -26,8 +48,7 @@ class NuforcReportSpider(scrapy.Spider):
                 if len(table_elements) > 0 else None
             
             # If the date time path can't be extracted, skil this row.
-            if not date_time_path:
-                continue
+            if not date_time_path: continue
             
             date_time = date_time_path.xpath('./font/a/text()').extract() \
                 if len(table_elements) > 0 else None

@@ -7,10 +7,14 @@ class NuforcReportSpider(scrapy.Spider):
     allowed_domains = ['www.nuforc.org']
     start_urls = ['http://www.nuforc.org/webreports/ndxpost.html']
 
-    def __init__(self, start_date = None, *args, **kwargs):
+    def __init__(self, start_date=None, stop_date=None, *args, **kwargs):
         self.start_date = \
             datetime.strptime(start_date, '%m/%d/%Y') \
             if start_date else None
+        self.stop_date = \
+            datetime.strptime(stop_date, '%m/%d/%Y') \
+            if stop_date else None
+
         super(NuforcReportSpider, self).__init__(*args, **kwargs)
 
     def parse(self, response):
@@ -31,10 +35,13 @@ class NuforcReportSpider(scrapy.Spider):
             link_date = \
                 datetime.strptime(link_date_selector.extract()[0], '%m/%d/%Y')
             
-            # If start date is None or link date is greater than start date,
-            # follow the link.
-            if (not self.start_date) or (link_date >= self.start_date):
-                yield response.follow(tl, self.parse_date_index)
+            # If link date is less than the start date, skip.
+            if self.start_date and (link_date < self.start_date): continue
+
+            # If link date is greater than or equal to the stop date, skip.
+            if self.stop_date and (link_date >= self.stop_date): continue
+
+            yield response.follow(tl, self.parse_date_index)
 
     def parse_date_index(self, response):
 

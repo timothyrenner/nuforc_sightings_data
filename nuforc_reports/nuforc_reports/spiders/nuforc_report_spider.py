@@ -58,7 +58,9 @@ class NuforcReportSpider(scrapy.Spider):
             if not date_time_path: continue
             
             date_time = date_time_path.xpath('./font/a/text()').extract() \
-                if len(table_elements) > 0 else None
+                if date_time_path else None
+            report_link = date_time_path.xpath('./font/a/@href').extract() \
+                if date_time_path else None
             city = table_elements[1].xpath('./font/text()').extract() \
                 if len(table_elements) > 1 else None
             state = table_elements[2].xpath('./font/text()').extract() \
@@ -80,6 +82,9 @@ class NuforcReportSpider(scrapy.Spider):
                 meta={
                     "report_summary": {
                         "date_time": date_time[0] if date_time else None,
+                        "report_link": 
+                            "http://www.nuforc.org/webreports/{}".format(
+                                report_link[0]) if report_link else None,
                         "city": city[0] if city else None,
                         "state": state[0] if state else None,
                         "shape": shape[0] if shape else None,

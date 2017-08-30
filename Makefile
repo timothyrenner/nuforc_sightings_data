@@ -17,3 +17,9 @@ data/raw/nuforc_reports.json:
 	scrapy crawl nuforc_report_spider \
 		--output $(ROOT)/data/raw/nuforc_reports.json \
 		--output-format jsonlines
+
+data/processed/nuforc_reports.csv: data/raw/nuforc_reports.json
+	python scripts/process_report_data.py \
+		data/raw/nuforc_reports.json \
+		--output-file data/processed/nuforc_reports.csv \
+		--exceptions-file data/exceptions/nuforc_exceptions.json

@@ -25,3 +25,6 @@ data/processed/nuforc_reports.csv: data/raw/nuforc_reports.json
 		--exceptions-file data/exceptions/nuforc_exceptions.json
 
 all: data/processed/nuforc_reports.csv
+
+load_elasticsearch: data/processed/nuforc_reports.csv
+	python scripts/load_elasticsearch.py data/processed/nuforc_reports.csv

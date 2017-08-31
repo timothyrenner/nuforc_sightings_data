@@ -23,3 +23,5 @@ data/processed/nuforc_reports.csv: data/raw/nuforc_reports.json
 		data/raw/nuforc_reports.json \
 		--output-file data/processed/nuforc_reports.csv \
 		--exceptions-file data/exceptions/nuforc_exceptions.json
+
+all: data/processed/nuforc_reports.csv

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime,timedelta
 import click
 import json
 from csv import DictWriter
@@ -15,6 +15,10 @@ def create_date_time(report_date_time):
     except ValueError:
         # Some of the dates are in the "short" format.
         date_time = datetime.strptime(report_date_time, SHORT_REPORT_DATE_TIME)
+
+    # Correct century.
+    if date_time > datetime.now():
+        date_time = date_time - timedelta(year=100)
 
     return date_time
 
@@ -57,6 +61,31 @@ def main(raw_report_file, output_file, exceptions_file):
 
         report["posted"] = posted_date_time
         report["date_time"] = report_date_time
+        
+        # Standardize shapes to lower case, merge the obvious ones.
+        report["shape"] = report["shape"].lower() if report["shape"] else None
+        if report["shape"] == "triangular":
+            report["shape"] = "triangle"
+        if report["shape"] == "changed": 
+            report["shape"] == "changing"
+
+        # Standardize the state names to upper case.
+        report["state"] = report["state"].upper() if report["state"] else None
+
+        # Bad / weird state names.
+        # NF -> NL for Newfoundland and Labrador.
+        if report["state"] == "NF":
+            report["state"] = "NL"
+        # PQ -> QC for Quebec.
+        if report["state"] == "PQ":
+            report["state"] = "QC"
+        # SA -> SK for Sasketchewan.
+        if report["state"] == "SA":
+            report["state"] = "SK"
+        # YK -> YT for Yukon Territory.
+        if report["state"] == "YK":
+            report["state"] = "YT"
+
         writer.writerow(report)
 
 if __name__ == "__main__":

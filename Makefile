@@ -24,6 +24,14 @@ data/processed/nuforc_reports.csv: data/raw/nuforc_reports.json
 		--output-file data/processed/nuforc_reports.csv \
 		--exceptions-file data/exceptions/nuforc_exceptions.json
 
+data/external/cities.csv:
+	wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity_CSV/GeoLiteCity-latest.tar.xz
+	mv GeoLiteCity-latest.tar.xz data/external/
+	tar -xzvf data/external/GeoLiteCity-latest.tar.xz
+	mv GeoLiteCity_* data/external/geolite_city
+	mv data/external/geolite_city/GeoLiteCity-Location.csv data/external/cities.csv
+	rm -rf data/external/geolite_city
+
 all: data/processed/nuforc_reports.csv
 
 load_elasticsearch: data/processed/nuforc_reports.csv

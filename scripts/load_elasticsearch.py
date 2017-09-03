@@ -21,7 +21,8 @@ nuforc_report_index_body = {
                 },
                 "date_time": {
                     "type": "date",
-                    "format": "date_hour_minute_second"
+                    "format": "date_hour_minute_second",
+                    "ignore_malformed": True
                 },
                 "report_link": {
                     "type": "text"
@@ -43,7 +44,8 @@ nuforc_report_index_body = {
                 },
                 "posted": {
                     "type": "date",
-                    "format": "date_hour_minute_second"
+                    "format": "date_hour_minute_second",
+                    "ignore_malformed": True
                 }
             }
         }

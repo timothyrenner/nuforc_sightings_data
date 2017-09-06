@@ -2,8 +2,9 @@ import click
 import json
 import re
 
-from csv import DictWriter
+from csv import DictReader,DictWriter
 from datetime import datetime,timedelta
+from toolz import curry, get_in
 
 REPORT_DATE_TIME = "%m/%d/%y %H:%M"
 SHORT_REPORT_DATE_TIME = "%m/%d/%y"
@@ -86,26 +87,65 @@ def clean_city(city):
     new_city = remove_forward_slashes(new_city)
     new_city = fix_saints(new_city)
 
+    # Correct New York City -> New York
+    if new_city.lower() == "new york city":
+        new_city = "New York"
+
     return new_city
+
+def _geocoder_template(geocoder_hash, state, city):
+    """ This is the template function for the geocoder. It's meant to have the
+        first argument (the hash) bound.
+    """
+    return get_in([(state,city.lower()), 0], geocoder_hash, None), \
+           get_in([(state,city.lower()), 1], geocoder_hash, None)
+
+def create_geocoder(city_file):
+    """ Creates a geocoder function for cities that takes a city name and region
+        and returns the latitude and longitude.
+    """
+    reader = DictReader(city_file)
+    
+    # Create a blank hash to load.
+    # (state_iso,city_name) => (lat, lon, records)
+    # state/city collisions are resolved by whichever one has the most records.
+    # Not 100% that's the right call but it's a start.
+    geocoder_hash = {}
+    
+    for row in reader:
+        row_key = \
+            (row["subdivision_1_iso_code"].upper(), 
+             row["city_name"].lower())
+        
+        if (row_key not in geocoder_hash) or \
+           (int(row["num_blocks"]) > geocoder_hash[row_key][2]):
+            geocoder_hash[row_key] = (
+                float(row["latitude"]),
+                float(row["longitude"]),
+                int(row["num_blocks"])
+            )
+    
+    # Bind the geocoder hash to the geocoder template.
+    return curry(_geocoder_template)(geocoder_hash)
 
 @click.command()
 @click.argument('raw_report_file', type=click.File('r'))
+@click.argument('city_file', type=click.File('r'))
 @click.option('--output-file', '-o', 
               type=click.File('w'), 
               default='output.csv')
-@click.option('--exceptions-file', '-e', 
-              type=click.File('w'), 
-              default='exceptions.json')
-def main(raw_report_file, output_file, exceptions_file):
+def main(raw_report_file, city_file, output_file):
     """ Reads the raw scraped JSON reports and processes them into a CSV file
-        whilst performing data enrichment and cleaning. If a report can't be
-        cleaned in an automated way it is passed to an exceptions file, with
-        the exception added as a field.
+        whilst performing data enrichment and cleaning. 
     """
+
+    # Create the geocoder function.
+    geocode = create_geocoder(city_file)
 
     writer = DictWriter(output_file, fieldnames=[
         "summary", "city", "state", "date_time", "shape", "duration",
-        "stats", "report_link", "text", "posted"
+        "stats", "report_link", "text", "posted",
+        "city_latitude", "city_longitude"
     ])
 
     writer.writeheader()
@@ -145,6 +185,15 @@ def main(raw_report_file, output_file, exceptions_file):
         report["city"] = clean_city(report["city"]) \
             if report["city"] \
             else report["city"]
+
+        # Geocode the report.
+        if report["state"] and report["city"]:
+            city_lat, city_lon = geocode(report["state"], report["city"])
+            report["city_latitude"] = city_lat
+            report["city_longitude"] = city_lon
+        else:
+            report["city_latitude"] = None
+            report["city_longitude"] = None
 
         writer.writerow(report)
 

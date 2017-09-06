@@ -25,12 +25,14 @@ data/processed/nuforc_reports.csv: data/raw/nuforc_reports.json
 		--exceptions-file data/exceptions/nuforc_exceptions.json
 
 data/external/cities.csv:
-	wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity_CSV/GeoLiteCity-latest.tar.xz
-	mv GeoLiteCity-latest.tar.xz data/external/
-	tar -xzvf data/external/GeoLiteCity-latest.tar.xz
-	mv GeoLiteCity_* data/external/geolite_city
-	mv data/external/geolite_city/GeoLiteCity-Location.csv data/external/cities.csv
-	rm -rf data/external/geolite_city
+	wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City-CSV.zip
+	unzip GeoLite2-City-CSV.zip
+	mv GeoLite2-City-CSV_* data/external/geolite_city
+	mv GeoLite2-City-CSV.zip data/external/
+	python scripts/make_cities.py \
+		data/external/geolite_city/GeoLite2-City-Locations-en.csv \
+		data/external/geolite_city/GeoLite2-City-Blocks-IPv4.csv \
+		--output-file data/external/cities.csv
 
 all: data/processed/nuforc_reports.csv
 

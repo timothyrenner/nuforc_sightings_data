@@ -46,6 +46,15 @@ nuforc_report_index_body = {
                     "type": "date",
                     "format": "date_hour_minute_second",
                     "ignore_malformed": True
+                },
+                "city_latitude": {
+                    "type": "float"
+                },
+                "city_longitude": {
+                    "type": "float"
+                },
+                "location": {
+                    "type": "geo_point"
                 }
             }
         }
@@ -60,7 +69,13 @@ def nuforc_bulk_action(doc, doc_id):
         "_index": nuforc_report_index_name,
         "_type": nuforc_report_type_name,
         "_id": doc_id,
-        "_source": doc
+        "_source": {
+            "location": {
+                "lat": float(doc["city_latitude"]),
+                "lon": float(doc["city_longitude"])
+            } if doc["city_latitude"] and doc["city_longitude"] else None,
+            **doc
+        }
     }
 
 @click.command()

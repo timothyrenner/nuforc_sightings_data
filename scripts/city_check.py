@@ -21,8 +21,13 @@ for sighting in sightings:
 
 bad_cities_counts = countby(['state','city'], bad_cities)
 
+total = 0
 for (state, city), count in \
     sorted(bad_cities_counts.items(), key=lambda x: x[1], reverse=True):
+
+    total += count
     
     bad_cities_file.writerow({'state': state, 'city': city, 'count': count})
+
+print("Total number of incomplete geocodes: {}".format(total))
     

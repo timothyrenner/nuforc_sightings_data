@@ -47,6 +47,17 @@ def fix_saints(report_city):
 
     return " ".join(city_components)
 
+def fix_forts(report_city):
+    """ Changes Ft. -> Fort.
+    """
+
+    city_components = report_city.split(" ")
+
+    if city_components[0].strip().lower() == "ft.":
+        city_components[0] = "Fort"
+
+    return " ".join(city_components)
+
 def clean_shape(shape):
     """ Standardizes the shape.
     """
@@ -80,16 +91,39 @@ def clean_state(state):
     
     return new_state
 
-def clean_city(city):
+def clean_city(city, state):
     """ Cleans the city names.
     """
     new_city = remove_parens(city)
     new_city = remove_forward_slashes(new_city)
     new_city = fix_saints(new_city)
+    new_city = fix_forts(new_city)
 
+    ####### SPOT CORRECTIONS #######
+    # These are corrections for the obvious weird stuff in either the city 
+    # database or the sighting data.
+    
     # Correct New York City -> New York
     if new_city.lower() == "new york city":
         new_city = "New York"
+
+    # Correct Saint / St. Louis MO -> St Louis MO
+    if ((new_city.lower() == "saint louis") or 
+        (new_city.lower() == "st. louis")) and \
+       (state == "MO"):
+        new_city = "St Louis"
+
+    # Correct Washington, D.C. -> Washington.
+    if new_city.lower() == "washington, d.c.":
+        new_city = "Washington"
+    
+    # Correct Saint Petersburg, FL -> St. Petersburg
+    if (new_city.lower() == "saint petersburg") and (state == "FL"):
+        new_city = "St. Petersburg"
+
+    # Correct Port St. Lucie -> Port Saint Lucie
+    if (new_city.lower() == "port st. lucie") and (state == "FL"):
+        new_city = "Port Saint Lucie"
 
     return new_city
 
@@ -182,8 +216,8 @@ def main(raw_report_file, city_file, output_file):
             else report["state"]
 
         # Clean the city.
-        report["city"] = clean_city(report["city"]) \
-            if report["city"] \
+        report["city"] = clean_city(report["city"], report["state"]) \
+            if report["city"] and report["state"]\
             else report["city"]
 
         # Geocode the report.

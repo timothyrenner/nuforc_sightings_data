@@ -8,6 +8,7 @@ import sys
 sightings = DictReader(open('data/processed/nuforc_reports.csv', 'r'))
 bad_cities_file = \
     DictWriter(open('bad_cities.csv', 'w'), fieldnames=['city','state','count'])
+bad_cities_file.writeheader()
 
 bad_cities = []
 for sighting in sightings:

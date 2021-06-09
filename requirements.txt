@@ -5,3 +5,4 @@ Scrapy==1.4.0
 toolz<1.0
 flake8
 black
+loguru

@@ -16,7 +16,10 @@ source activate nuforc
 make requirements
 
 # Takes a very long time - about 3-4 hours.
-make all
+make pull_data
+
+# Now process it for the final csv.
+make data/processed/nuforc_reports.csv
 ```
 
 This downloads two datasets: the raw reports as line delimited JSON and a CSV file that contains refined fields (i.e. standardized / corrected states, cities, shapes, etc) as well as additional fields for the latitude and longitude of the sighting at the city level for most of the sightings.
@@ -25,6 +28,8 @@ This downloads two datasets: the raw reports as line delimited JSON and a CSV fi
 
 The raw reports are pulled into `data/raw/nuforc_reports.json` as line delimited JSON.
 The reports take a long time to download because there are a lot of them and because the scraper is throttled so as not to hit the NUFORC server very hard.
+Also, the target doesn't simply pull the data, it also merges it with any past data.
+That way if any reports are removed from the NUFORC site (it's happened in the past), they will persist as long as they were pulled at some point.
 Each record has the following schema:
 
 ```javascript

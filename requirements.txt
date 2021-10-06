@@ -1,7 +1,7 @@
 click==6.7
 elasticsearch==5.4.0
 lxml
-Scrapy==1.4.0
+Scrapy==1.8.1
 toolz<1.0
 flake8
 black

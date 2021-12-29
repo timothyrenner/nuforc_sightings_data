@@ -1,0 +1,9 @@
+name: nuforc
+channels:
+  - defaults
+dependencies:
+  - pip
+  - python=3.9
+  - pip:
+      - black
+      - flake8

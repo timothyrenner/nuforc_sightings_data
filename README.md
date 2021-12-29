@@ -7,19 +7,18 @@ This project contains the code necessary to collect the data in the database, pe
 
 **NOTE** Requires the Anaconda python distribution.
 
+**NOTE** Requires the [Maxmind GeoLite2](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data?lang=en), which is free, but requires an account.
+Download the zip file to `data/external`.
+
 To get started, cd into the project root and run
 
 ```shell
-make create_environment
-source activate nuforc
-
-make requirements
+conda env create -f environment.yaml
+conda activate nuforc
+pip install -r requirements.txt
 
 # Takes a very long time - about 3-4 hours.
-make pull_data
-
-# Now process it for the final csv.
-make data/processed/nuforc_reports.csv
+dvc repro
 ```
 
 This downloads two datasets: the raw reports as line delimited JSON and a CSV file that contains refined fields (i.e. standardized / corrected states, cities, shapes, etc) as well as additional fields for the latitude and longitude of the sighting at the city level for most of the sightings.
@@ -104,28 +103,7 @@ Here's the schema for the file:
 | `posted`         | The date the sighting was posted in ISO 8601.                  |
 | `city_latitude`  | The latitude of the city of the sighting.                      |
 | `city_longitude` | The longitude of the city of the sighting.                     |
-
-## Makefile Targets
-
-The included makefile has the following targets.
-
-| target                              | description                                                      |
-| ----------------------------------- | ---------------------------------------------------------------- |
-| `create_environment`                | Creates a conda environment `nuforc`.                            |
-| `destroy_environment`               | Destroys the `nuforc` environment.                               |
-| `freeze`                            | Freezes the dependencies into `requirements.txt`.                |
-| `requirements`                      | Installs the dependencies in `requirements.txt`.                 |
-| `data/raw/nuforc_reports.json`      | Performs the scrape for the raw reports.                         |
-| `data/external/cities.csv`          | Downloads and builds the city geocoder file.                     |
-| `data/processed/nuforc_reports.csv` | Processed and geocodes the reports.                              |
-| `all`                               | Shortcut for `data/processed/nuforc_reports.csv`.                |
-| `load_elasticsearch`                | Loads the processed reports into a local Elasticsearch instance. |
-
-The only thing that isn't super obvious is the Elasticsearch target.
-I use Elasticsearch / Kibana to summarize, visualize, and sanity check the data while I work on the processing, so I put it there for convenience.
-Use it or ignore it, it's not vital to getting the data.
-
 ## Other Notes
 
-This product includes GeoLite2 data created by MaxMind, available from
+This product uses GeoLite2 data created by MaxMind, available from
 <a href="http://www.maxmind.com">http://www.maxmind.com</a>.

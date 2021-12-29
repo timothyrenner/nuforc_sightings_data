@@ -1,0 +1,88 @@
+schema: '2.0'
+stages:
+  save-existing-reports:
+    cmd:
+    - touch data/raw/nuforc_reports.json
+    - cp data/raw/nuforc_reports.json data/raw/nuforc_reports_orig.json
+    outs:
+    - path: data/raw/nuforc_reports_orig.json
+      md5: 93ee4d58333982a183e9a6b16a020adc
+      size: 204748981
+  unzip-cities:
+    cmd:
+    - unzip -o data/external/GeoLite2-City-CSV.zip -d data/external/
+    - rm -rf data/external/geolite_city
+    - mv -f data/external/GeoLite2-City-CSV_* data/external/geolite_city
+    deps:
+    - path: data/external/GeoLite2-City-CSV.zip
+      md5: d0353ca012386e331a3f9f7b6c5cc68b
+      size: 37951653
+    outs:
+    - path: data/external/geolite_city/GeoLite2-City-Blocks-IPv4.csv
+      md5: 42d5ec87fe8c5ed38599e5644b30dc12
+      size: 197961972
+    - path: data/external/geolite_city/GeoLite2-City-Locations-en.csv
+      md5: bb87dc4bdca4e0768f1c3e1d883d5699
+      size: 8634622
+  make-cities:
+    cmd:
+    - python scripts/make_cities.py data/external/geolite_city/GeoLite2-City-Locations-en.csv
+      data/external/geolite_city/GeoLite2-City-Blocks-IPv4.csv --output-file data/external/cities.csv
+    deps:
+    - path: data/external/geolite_city/GeoLite2-City-Blocks-IPv4.csv
+      md5: 42d5ec87fe8c5ed38599e5644b30dc12
+      size: 197961972
+    - path: data/external/geolite_city/GeoLite2-City-Locations-en.csv
+      md5: bb87dc4bdca4e0768f1c3e1d883d5699
+      size: 8634622
+    - path: scripts/make_cities.py
+      md5: f46af8dbf6a3b8142be74a2584b001fe
+      size: 1217
+    outs:
+    - path: data/external/cities.csv
+      md5: 9a5cd07c7219e6c98c01b555d2039eff
+      size: 5664985
+  pull-new-reports:
+    cmd:
+    - cd nuforc_reports && scrapy crawl nuforc_report_spider --output $(dvc root)/data/raw/nuforc_reports_new.json
+      --output-format jsonlines
+    outs:
+    - path: data/raw/nuforc_reports_new.json
+      md5: 3ee52bd425019a75123ae9bd68ea98e7
+      size: 204055511
+  merge-reports:
+    cmd:
+    - python scripts/union_nuforc_reports.py data/raw/nuforc_reports_orig.json data/raw/nuforc_reports_new.json
+      data/raw/nuforc_reports.json
+    deps:
+    - path: data/raw/nuforc_reports_new.json
+      md5: 3ee52bd425019a75123ae9bd68ea98e7
+      size: 204055511
+    - path: data/raw/nuforc_reports_orig.json
+      md5: 93ee4d58333982a183e9a6b16a020adc
+      size: 204748981
+    - path: scripts/union_nuforc_reports.py
+      md5: d14437b7531198ddf7e12cbd61929450
+      size: 1130
+    outs:
+    - path: data/raw/nuforc_reports.json
+      md5: 12b8457d32509bdba03631ebc3d5d635
+      size: 204748981
+  geocode-reports:
+    cmd:
+    - python scripts/process_report_data.py data/raw/nuforc_reports.json data/external/cities.csv
+      --output-file data/processed/nuforc_reports.csv
+    deps:
+    - path: data/external/cities.csv
+      md5: 9a5cd07c7219e6c98c01b555d2039eff
+      size: 5664985
+    - path: data/raw/nuforc_reports.json
+      md5: 12b8457d32509bdba03631ebc3d5d635
+      size: 204748981
+    - path: scripts/process_report_data.py
+      md5: 86ad11922e09cacd56c739bb3505fe4c
+      size: 7694
+    outs:
+    - path: data/processed/nuforc_reports.csv
+      md5: b19935a53fdeba9d98d5cddab73630ce
+      size: 192252516

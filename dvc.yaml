@@ -1,0 +1,68 @@
+stages:
+  save-existing-reports:
+    cmd:
+      - touch data/raw/nuforc_reports.json
+      - cp data/raw/nuforc_reports.json data/raw/nuforc_reports_orig.json
+    outs:
+      - data/raw/nuforc_reports_orig.json
+    always_changed: true
+
+  pull-new-reports:
+    cmd:
+      - cd nuforc_reports && scrapy crawl nuforc_report_spider
+        --output $(dvc root)/data/raw/nuforc_reports_new.json
+        --output-format jsonlines
+    outs:
+      - data/raw/nuforc_reports_new.json
+    always_changed: true
+
+  merge-reports:
+    cmd:
+      - python scripts/union_nuforc_reports.py
+        data/raw/nuforc_reports_orig.json
+        data/raw/nuforc_reports_new.json
+        data/raw/nuforc_reports.json
+    deps:
+      - scripts/union_nuforc_reports.py
+      - data/raw/nuforc_reports_orig.json
+      - data/raw/nuforc_reports_new.json
+    outs:
+      - data/raw/nuforc_reports.json:
+          persist: true
+
+  unzip-cities:
+    cmd:
+      - unzip -o data/external/GeoLite2-City-CSV.zip -d data/external/
+      - rm -rf data/external/geolite_city
+      - mv -f data/external/GeoLite2-City-CSV_* data/external/geolite_city
+    deps:
+      - data/external/GeoLite2-City-CSV.zip
+    outs:
+      - data/external/geolite_city/GeoLite2-City-Locations-en.csv
+      - data/external/geolite_city/GeoLite2-City-Blocks-IPv4.csv
+
+  make-cities:
+    cmd:
+      - python scripts/make_cities.py
+        data/external/geolite_city/GeoLite2-City-Locations-en.csv
+        data/external/geolite_city/GeoLite2-City-Blocks-IPv4.csv
+        --output-file data/external/cities.csv
+    deps:
+      - scripts/make_cities.py
+      - data/external/geolite_city/GeoLite2-City-Locations-en.csv
+      - data/external/geolite_city/GeoLite2-City-Blocks-IPv4.csv
+    outs:
+      - data/external/cities.csv
+
+  geocode-reports:
+    cmd:
+      - python scripts/process_report_data.py
+        data/raw/nuforc_reports.json
+        data/external/cities.csv
+        --output-file data/processed/nuforc_reports.csv
+    deps:
+      - scripts/process_report_data.py
+      - data/raw/nuforc_reports.json
+      - data/external/cities.csv
+    outs:
+      - data/processed/nuforc_reports.csv

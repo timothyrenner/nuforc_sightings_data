@@ -14,6 +14,7 @@ stages:
         --output-format jsonlines
     outs:
       - data/raw/nuforc_reports_new.json
+    always_changed: true
 
   merge-reports:
     cmd:

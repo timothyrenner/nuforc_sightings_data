@@ -212,6 +212,7 @@ def main(raw_report_file, city_file, output_file):
         output_file,
         fieldnames=[
             "summary",
+            "country",
             "city",
             "state",
             "date_time",

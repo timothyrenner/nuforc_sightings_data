@@ -21,7 +21,7 @@ class NuforcReportSpider(scrapy.Spider):
         
         table_links = response.xpath('//tr/td/a')
         for tl in table_links:
-            
+
             # Guard against empty rows.
             if not tl: continue
 
@@ -57,23 +57,23 @@ class NuforcReportSpider(scrapy.Spider):
             # If the date time path can't be extracted, skip this row.
             if not date_time_path: continue
             
-            date_time = date_time_path.xpath('./font/a/text()').extract() \
+            date_time = date_time_path.xpath('./a/text()').extract() \
                 if date_time_path else None
-            report_link = date_time_path.xpath('./font/a/@href').extract() \
+            report_link = date_time_path.xpath('./a/@href').extract() \
                 if date_time_path else None
-            city = table_elements[1].xpath('./font/text()').extract() \
+            city = table_elements[1].xpath('./text()').extract() \
                 if len(table_elements) > 1 else None
-            state = table_elements[2].xpath('./font/text()').extract() \
+            state = table_elements[2].xpath('./text()').extract() \
                 if len(table_elements) > 2 else None
-            country = table_elements[3].xpath('./font/text()').extract() \
+            country = table_elements[3].xpath('./text()').extract() \
                 if len(table_elements) > 3 else None
-            shape = table_elements[4].xpath('./font/text()').extract() \
+            shape = table_elements[4].xpath('./text()').extract() \
                 if len(table_elements) > 4 else None
-            duration = table_elements[5].xpath('./font/text()').extract() \
+            duration = table_elements[5].xpath('./text()').extract() \
                 if len(table_elements) > 5 else None
-            summary = table_elements[6].xpath('./font/text()').extract() \
+            summary = table_elements[6].xpath('./text()').extract() \
                 if len(table_elements) > 6 else None
-            posted = table_elements[7].xpath('./font/text()').extract() \
+            posted = table_elements[7].xpath('./text()').extract() \
                 if len(table_elements) > 7 else None
 
             # Passing the summary table contents as metadata so the report 

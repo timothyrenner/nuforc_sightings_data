@@ -1,7 +1,7 @@
 click
 elasticsearch==5.4.0
 lxml
-Scrapy==2.6.2
+Scrapy==2.6.3
 toolz<1.0
 loguru
 dvc[gs]

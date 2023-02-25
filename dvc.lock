@@ -6,8 +6,8 @@ stages:
     - cp data/raw/nuforc_reports.json data/raw/nuforc_reports_orig.json
     outs:
     - path: data/raw/nuforc_reports_orig.json
-      md5: d41d8cd98f00b204e9800998ecf8427e
-      size: 0
+      md5: 56039b24b50b22bfb030a6a075c731b6
+      size: 219661245
   unzip-cities:
     cmd:
     - unzip -o data/external/GeoLite2-City-CSV.zip -d data/external/
@@ -48,26 +48,26 @@ stages:
       --output-format jsonlines
     outs:
     - path: data/raw/nuforc_reports_new.json
-      md5: 56039b24b50b22bfb030a6a075c731b6
-      size: 219661245
+      md5: 008eb3929e866d62dc34a0e4a61b32d6
+      size: 224213664
   merge-reports:
     cmd:
     - python scripts/union_nuforc_reports.py data/raw/nuforc_reports_orig.json data/raw/nuforc_reports_new.json
       data/raw/nuforc_reports.json
     deps:
     - path: data/raw/nuforc_reports_new.json
+      md5: 008eb3929e866d62dc34a0e4a61b32d6
+      size: 224213664
+    - path: data/raw/nuforc_reports_orig.json
       md5: 56039b24b50b22bfb030a6a075c731b6
       size: 219661245
-    - path: data/raw/nuforc_reports_orig.json
-      md5: d41d8cd98f00b204e9800998ecf8427e
-      size: 0
     - path: scripts/union_nuforc_reports.py
       md5: d14437b7531198ddf7e12cbd61929450
       size: 1130
     outs:
     - path: data/raw/nuforc_reports.json
-      md5: 56039b24b50b22bfb030a6a075c731b6
-      size: 219661245
+      md5: 50e3f0b6dd1ba5f195111251fb78ecd6
+      size: 224216951
   geocode-reports:
     cmd:
     - python scripts/process_report_data.py data/raw/nuforc_reports.json data/external/cities.csv
@@ -77,12 +77,12 @@ stages:
       md5: 86c9047b80e68102fc8d19376b7b4c22
       size: 6570447
     - path: data/raw/nuforc_reports.json
-      md5: 56039b24b50b22bfb030a6a075c731b6
-      size: 219661245
+      md5: 50e3f0b6dd1ba5f195111251fb78ecd6
+      size: 224216951
     - path: scripts/process_report_data.py
       md5: 03fd59b015bf15dea56ea4270ae835bb
       size: 7717
     outs:
     - path: data/processed/nuforc_reports.csv
-      md5: 33886896bf24a6abb9ae895b29b31a0c
-      size: 204429923
+      md5: d8e712aa3d37e2d3f71a634134067eec
+      size: 208624171

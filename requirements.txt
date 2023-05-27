@@ -6,3 +6,7 @@ toolz<1.0
 loguru
 dvc[gs]
 pandas
+typer
+pyproj
+shapely
+geopandas

@@ -112,7 +112,7 @@ def main(input_file: Path, output_file: Path):
             )
         )
 
-    pd.DataFrame(list(map(asdict, bases))).to_csv(output_file)
+    pd.DataFrame(list(map(asdict, bases))).to_csv(output_file, index=False)
 
 
 if __name__ == "__main__":

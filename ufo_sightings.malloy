@@ -1,0 +1,69 @@
+--! styles ufo_sightings.styles.json
+source: ufo_sightings is table('duckdb:data/processed/nuforc_reports.csv') {
+    dimension: city_and_state is concat(city, ', ', state)
+    dimension: sighting_year is year(date_time) 
+    dimension: sighting_day_of_year is day_of_year(date_time)
+    measure: num_sightings is count()
+
+    query: has_date_time is {
+        project: *
+        where: date_time != null
+    }
+    
+    query: geocoded is {
+        project: *
+        where: city_latitude != null and city_longitude != null
+    }
+}
+
+source: geocoded_ufo_sightings is from (ufo_sightings -> geocoded ) {
+    measure: num_sightings is count()
+    query: by_city is {
+        group_by: city_and_state
+        aggregate: num_sightings
+    }
+
+    query: top_cities_chart is by_city -> {
+        project: 
+            `City` is city_and_state,
+            `Number of UFO Sightings` is num_sightings,
+        limit: 20
+    }
+
+    query: by_state is {
+        group_by: state
+        aggregate: num_sightings
+    }
+
+    query: by_state_map is by_state -> {
+        project:
+            state,
+            `UFO Sightings` is num_sightings
+    }
+}
+
+source: dated_ufo_sightings is from (ufo_sightings -> has_date_time) {
+    measure: num_sightings is count()
+
+    query: by_day_of_year is {
+        group_by: sighting_day_of_year
+        aggregate: num_sightings
+    }
+
+    query: by_day_of_year_chart is by_day_of_year -> {
+        project:
+            `Day of Year` is sighting_day_of_year,
+            `UFO Sightings` is num_sightings
+    }
+
+    query: by_year is {
+        group_by: sighting_year
+        aggregate: num_sightings
+    }
+
+    query: by_year_chart is by_year -> {
+        project:
+            `Year` is sighting_year,
+            `UFO Sightings` is num_sightings
+    }
+}

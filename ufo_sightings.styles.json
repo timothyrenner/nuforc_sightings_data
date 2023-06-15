@@ -1,0 +1,14 @@
+{
+    "top_cities_chart": {
+        "renderer": "bar_chart"
+    },
+    "by_state_map": {
+        "renderer": "shape_map"
+    },
+    "by_day_of_year_chart": {
+        "renderer": "line_chart"
+    },
+    "by_year_chart": {
+        "renderer": "bar_chart"
+    }
+}

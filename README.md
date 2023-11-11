@@ -3,6 +3,12 @@
 The Nationa UFO Research Center ([NUFORC](http://www.nuforc.org/)) maintains an online database of over 100,000 UFO sightings including city, shape, and a text description.
 This project contains the code necessary to collect the data in the database, perform some standardization and cleaning, and geocode the sightings at the city/state level.
 
+> **Warning**
+    The NUFORC site has changed.
+    I will get to it when I am able, but at the moment the site changes have broken these scraper scripts.
+    See https://github.com/timothyrenner/nuforc_sightings_data/issues/21 for some details and to track progress.
+    I'm not sure when I will be able to take a look but when I do I will post there.
+
 ## Quickstart
 
 **NOTE** Requires the Anaconda python distribution.

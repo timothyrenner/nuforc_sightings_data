@@ -4,10 +4,7 @@ The Nationa UFO Research Center ([NUFORC](http://www.nuforc.org/)) maintains an 
 This project contains the code necessary to collect the data in the database, perform some standardization and cleaning, and geocode the sightings at the city/state level.
 
 > **Warning**
-    The NUFORC site has changed.
-    I will get to it when I am able, but at the moment the site changes have broken these scraper scripts.
-    See https://github.com/timothyrenner/nuforc_sightings_data/issues/21 for some details and to track progress.
-    I'm not sure when I will be able to take a look but when I do I will post there.
+    The NUFORC site's [terms of service](https://nuforc.org/terms/) explicitly forbid both scraping and distributing the data. The data can be requested directly from them by emailing their CTO. This repository will stay up for historical and experimental purposes, but will not be used to update the dataset on data.world any more. The maintainer and contributors are not responsible for usage of this code that violates the ToS.
 
 ## Quickstart
 
